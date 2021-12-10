@@ -6,6 +6,12 @@ type Response struct {
 	Msg     string       `json:"msg,omitempty" bson:"msg,omitempty"`
 	Data    []Descriptor `json:"data,omitempty" bson:"data,omitempty"`
 }
+type Responses struct {
+	Success bool         `json:"success,omitempty" bson:"success,omitempty"`
+	Status  string       `json:"status,omitempty" bson:"status,omitempty"`
+	Msg     string       `json:"msg,omitempty" bson:"msg,omitempty"`
+	Data    Descriptor `json:"data,omitempty" bson:"data,omitempty"`
+}
 type Descriptor struct {
 	Id      string     `json:"id" bson:"id"`
 	Type    string     `json:"type,omitempty" bson:"type,omitempty"`
