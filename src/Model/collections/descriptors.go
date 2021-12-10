@@ -6,6 +6,9 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"fmt"
+	"os"
+	"io"
 	
 	"github.com/ilhamabdlh/go-restapi/helper"
 	"github.com/ilhamabdlh/go-restapi/models"
@@ -36,8 +39,9 @@ func getDescriptors(w http.ResponseWriter, r *http.Request) {
 	var protocols []models.Protocols 
 	var items []models.Items 
 
+	var descriptor models.Descriptor
 	for cur.Next(context.TODO()) {
-		var descriptor models.Descriptor
+		
 		err := cur.Decode(&descriptor) 
 		if err != nil {
 			log.Fatal(err)
@@ -77,17 +81,17 @@ func getDescriptors(w http.ResponseWriter, r *http.Request) {
 		items = append(items, item)	
 	}
 
-	for i := range descriptors {
-		filteredItems := getItemByIdFromDescriptor(items, descriptors[i].Id)
+	for i := range protocols {
+		filteredItems := getItemByIdFromDescriptor(items, protocols[i].Id)
 		protocols[i].Items = filteredItems
-		filteredItemsTwo := getItemByIdFromDescriptor(items, descriptors[i].Id)
+		filteredItemsTwo := getItemByIdFromDescriptor(items, protocols[i].Id)
 		protocols[i].Items = filteredItemsTwo
 	}
 
-	for i := range descriptors {
-		filteredProtocols := getProtocolByIdFromDescriptor(protocols, descriptors[i].Id)
+	for i := range configs {
+		filteredProtocols := getProtocolByIdFromDescriptor(protocols, configs[i].Id)
 		configs[i].Protocol = filteredProtocols
-		filteredProtocolsTwo := getProtocolByIdFromDescriptor(protocols, descriptors[i].Id)
+		filteredProtocolsTwo := getProtocolByIdFromDescriptor(protocols, statuses[i].Id)
 		statuses[i].Protocol = filteredProtocolsTwo
 	}
 
@@ -108,7 +112,7 @@ func getDescriptors(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var response models.Response
-	response.Data = descriptors
+	response.Data = descriptors  
 	response.Status = strconv.Itoa(msg)
 	response.Success = success
 	response.Msg = http.StatusText(msg)
@@ -117,7 +121,7 @@ func getDescriptors(w http.ResponseWriter, r *http.Request) {
 	if err := cur.Err(); err != nil {
 		log.Fatal(err)
 	}
-	json.NewEncoder(w).Encode(responses)
+	json.NewEncoder(w).Encode(response)
 }
 
 func getConfigByIdFromDescriptor(configs []models.Config, id string) []models.Config {
@@ -159,6 +163,19 @@ func getItemByIdFromDescriptor(items []models.Items, id string) []models.Items {
 	return result
 }
 
+func getStatusCode(w http.ResponseWriter, r *http.Request){
+	var status string
+	if w != nil {
+		status = "400"
+		r := fmt.Sprintln(status)
+		io.WriteString(os.Stdout, r)
+	} else {
+		status = "200"
+		e := fmt.Sprintln(status)
+		io.WriteString(os.Stdout, e)
+	}
+}
+
 func getDescriptor(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var descriptors []models.Descriptor
@@ -169,26 +186,91 @@ func getDescriptor(w http.ResponseWriter, r *http.Request) {
 
 	filter := bson.M{"id": id}
 	db, _ := helper.Connect()
-	err := db.Collection("descriptors").FindOne(context.TODO(), filter).Decode(&descriptor)
+	err := db.Collection("descriptors").FindOne(context.TODO(), filter).Decode(&descriptor)	
+	conf, _ := db.Collection("configs").Find(context.TODO(), bson.M{})
+	prot, _ := db.Collection("protocols").Find(context.TODO(), bson.M{})
+	stat, _ := db.Collection("statuses").Find(context.TODO(), bson.M{})
+	it, _ := db.Collection("items").Find(context.TODO(), bson.M{})
+	
+	var configs []models.Config
+	var statuses []models.Statuses
+	var protocols []models.Protocols 
+	var items []models.Items 
+
+	descriptors = append(descriptors, descriptor)
+
+	var config models.Config
+	for conf.Next(context.TODO()){
+		err := conf.Decode(&config) 
+		if err != nil {
+			log.Fatal(err)
+		}
+		configs = append(configs, config)	
+	}
+	var protocol models.Protocols
+	for prot.Next(context.TODO()){
+		err := prot.Decode(&protocol) 
+		if err != nil {
+			log.Fatal(err)
+		}
+		protocols = append(protocols, protocol)	
+	}
+	var status models.Statuses
+	for stat.Next(context.TODO()){
+		err := stat.Decode(&status) 
+		if err != nil {
+			log.Fatal(err)
+		}
+		statuses = append(statuses, status)	
+	}
+	var item models.Items
+	for it.Next(context.TODO()){
+		err := it.Decode(&item) 
+		if err != nil {
+			log.Fatal(err)
+		}
+		items = append(items, item)	
+	}
+
+	for i := range protocols {
+		filteredItems := getItemByIdFromDescriptor(items, protocols[i].Id)
+		protocols[i].Items = filteredItems
+		filteredItemsTwo := getItemByIdFromDescriptor(items, protocols[i].Id)
+		protocols[i].Items = filteredItemsTwo
+	}
+
+	for i := range configs {
+		filteredProtocols := getProtocolByIdFromDescriptor(protocols, configs[i].Id)
+		configs[i].Protocol = filteredProtocols
+		filteredProtocolsTwo := getProtocolByIdFromDescriptor(protocols, statuses[i].Id)
+		statuses[i].Protocol = filteredProtocolsTwo
+	}
+
+	for i := range descriptors {
+		filteredConfigs := getConfigByIdFromDescriptor(configs, descriptors[i].Id)
+		descriptors[i].Configs = filteredConfigs
+		filteredStatuses := getStatusByIdFromDescriptor(statuses, descriptors[i].Id)
+		descriptors[i].Status = filteredStatuses
+	}
 
 	if err != nil {
 		helper.GetError(err, w)
 		return
 	}
 
-	descriptors = append(descriptors, descriptor)
-	var status int
+	// descriptors = append(descriptors, descriptor)
+	var msg int
 	if err != nil {
-		status = 400
+		msg = 400
 	} else {
-		status = 200
+		msg = 200
 	}
 
-	var response models.Response
-	response.Data = descriptors
-	response.Status = strconv.Itoa(status)
+	var response models.Responses
+	response.Data = descriptors[0]
+	response.Status = strconv.Itoa(msg)
 	response.Success = true
-	response.Msg = http.StatusText(status)
+	response.Msg = http.StatusText(msg)
 
 	json.NewEncoder(w).Encode(response)
 }
@@ -295,5 +377,6 @@ func MainDescriptors() {
 	r.HandleFunc("/descriptor/{id}", getDescriptor).Methods("GET")
 	r.HandleFunc("/descriptor/New", createDescriptor).Methods("POST")
 	r.HandleFunc("/descriptor/{id}", updateDescriptor).Methods("PUT")
+	r.HandleFunc("/descriptor/", getStatusCode).Methods("GET")
 
 }
