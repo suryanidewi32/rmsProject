@@ -5,59 +5,67 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	
+
+	"github.com/gorilla/mux"
 	"github.com/ilhamabdlh/go-restapi/helper"
 	"github.com/ilhamabdlh/go-restapi/models"
-	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 )
-var collectionProtocol = helper.ConnectProtocolsDB()
 
 func getProtocols(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	db, _ := helper.Connect()
 
+	prot, _ := db.Collection("protocols").Find(context.TODO(), bson.M{})
+	it, _ := db.Collection("items").Find(context.TODO(), bson.M{})
 
-	var protocols []models.Protocol
+	var protocols []models.Protocols
+	var items []models.Items
 
-	cur, err := collectionProtocol.Find(context.TODO(), bson.M{})
-
-	if err != nil {
-		helper.GetError(err, w)
-		return
-	}
-
-	defer cur.Close(context.TODO())
-
-	for cur.Next(context.TODO()) {
-
-		var protocol models.Protocol
-		
-		err := cur.Decode(&protocol) 
+	var protocol models.Protocols
+	for prot.Next(context.TODO()) {
+		err := prot.Decode(&protocol)
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		protocols = append(protocols, protocol)
 	}
-
-	if err := cur.Err(); err != nil {
-		log.Fatal(err)
+	var item models.Items
+	for it.Next(context.TODO()) {
+		err := it.Decode(&item)
+		if err != nil {
+			log.Fatal(err)
+		}
+		items = append(items, item)
+	}
+	for i := range protocols {
+		filteredItems := getItemByIdProtocol(items, protocols[i].Id)
+		protocols[i].Items = filteredItems
 	}
 
-	json.NewEncoder(w).Encode(protocols) 
+	json.NewEncoder(w).Encode(protocols)
+}
+func getItemByIdProtocol(items []models.Items, id string) []models.Items {
+	result := []models.Items{}
+	for i := range items {
+		if items[i].Id == id {
+			result = append(result, items[i])
+		}
+	}
+	return result
 }
 
 func getProtocol(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var protocol models.Protocol
+	var protocol models.Protocols
 	var params = mux.Vars(r)
-	
+	db, _ := helper.Connect()
 
 	var id string = params["id"]
 
 	filter := bson.M{"id": id}
-	err := collectionProtocol.FindOne(context.TODO(), filter).Decode(&protocol)
+	err := db.Collection("protocols").FindOne(context.TODO(), filter).Decode(&protocol)
 
 	if err != nil {
 		helper.GetError(err, w)
@@ -67,34 +75,14 @@ func getProtocol(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(protocol)
 }
 
-
-func createProtocols(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	var protocol models.Protocol
-
-	_ = json.NewDecoder(r.Body).Decode(&protocol)
-
-	result, err := collectionProtocol.InsertOne(context.TODO(), protocol)
-
-	if err != nil {
-		helper.GetError(err, w)
-		return
-	}
-
-	json.NewEncoder(w).Encode(result)
-}
-
 func updateProtocol(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var params = mux.Vars(r)
 	var id string = params["id"]
-
-	var protocol models.Protocol
-	
+	db, _ := helper.Connect()
+	var protocol models.Protocols
 	filter := bson.M{"id": id}
-
 	_ = json.NewDecoder(r.Body).Decode(&protocol)
 
 	update := bson.D{
@@ -106,7 +94,7 @@ func updateProtocol(w http.ResponseWriter, r *http.Request) {
 		}},
 	}
 
-	err := collectionProtocol.FindOneAndUpdate(context.TODO(), filter, update).Decode(&protocol)
+	err := db.Collection("protocols").FindOneAndUpdate(context.TODO(), filter, update).Decode(&protocol)
 
 	if err != nil {
 		helper.GetError(err, w)
@@ -118,34 +106,10 @@ func updateProtocol(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(protocol)
 }
 
-
-func deleteProtocol(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	var params = mux.Vars(r)
-
-	var id string = params["id"]
-
-	filter := bson.M{"id": id}
-
-	deleteResult, err := collectionProtocol.DeleteOne(context.TODO(), filter)
-
-	if err != nil {
-		helper.GetError(err, w)
-		return
-	}
-
-	json.NewEncoder(w).Encode(deleteResult)
-}
-
-
-
 func MainProtocols() {
 	r := helper.Routes
 	r.HandleFunc("/descriptor/protocols", getProtocols).Methods("GET")
 	r.HandleFunc("/descriptor/protocol/{id}", getProtocol).Methods("GET")
-	r.HandleFunc("/descriptor/protocols", createProtocols).Methods("POST")
 	r.HandleFunc("/descriptor/protocol/{id}", updateProtocol).Methods("PUT")
-	r.HandleFunc("/descriptor/protocol/{id}", deleteProtocol).Methods("DELETE")
 
 }
