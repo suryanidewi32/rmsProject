@@ -9,7 +9,6 @@ const SearchBar = (child) =>{
      form.resetFields();
    };
 
-
   return(
     <Form
       form={form}

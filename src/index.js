@@ -5,9 +5,15 @@ import Routing from 'Controllers/Router/Router';
 
 import reportWebVitals from './reportWebVitals';
 
+import store from 'Store';
+import {Provider} from 'react-redux';
+
+
 ReactDOM.render(
   <React.StrictMode>
+    <Provider store={store}>
     <Routing />
+    </Provider>
   </React.StrictMode>,
   document.getElementById('root'),
 );

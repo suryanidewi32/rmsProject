@@ -1,3 +1,4 @@
+
 import { Button, Form, Input } from 'antd';
 
 const DeviceForm = (props) =>{
@@ -150,6 +151,49 @@ const DeviceForm = (props) =>{
       >
          <Input onChange={props.handleItemsNameconfig}/>
       </Form.Item>
+
+      <Form.Item
+        label="Priority"
+        name="Priorityconfig"
+      >
+         <Input onChange={props.handlePriorityconfig}/>
+      </Form.Item>
+
+      <Form.Item
+        label="Max"
+        name="Maxconfig"
+      >
+         <Input onChange={props.handleMaxconfig}/>
+      </Form.Item>
+      
+      <Form.Item
+        label="Min"
+        name="Minconfig"
+      >
+         <Input onChange={props.handleMinconfig}/>
+      </Form.Item>
+
+      <Form.Item
+        label="Description"
+        name="Descconfig"
+      >
+         <Input onChange={props.handleDescconfig}/>
+      </Form.Item>
+
+      <Form.Item
+        label="Ui"
+        name="Uiconfig"
+      >
+         <Input onChange={props.handleUiconfig}/>
+      </Form.Item>
+
+      <Form.Item
+        label="Presist"
+        name="Presistconfig"
+      >
+         <Input onChange={props.handlePresistconfig}/>
+      </Form.Item>
+
       
       <Form.Item
         label="Status Type"
@@ -191,6 +235,48 @@ const DeviceForm = (props) =>{
         name="itemsnamestatus"
       >
          <Input onChange={props.handleItemsNamestatus}/>
+      </Form.Item>
+
+      <Form.Item
+        label="Priority"
+        name="Prioritystatus"
+      >
+         <Input onChange={props.handlePrioritystatus}/>
+      </Form.Item>
+
+      <Form.Item
+        label="Max"
+        name="Maxstatus"
+      >
+         <Input onChange={props.handleMaxstatus}/>
+      </Form.Item>
+      
+      <Form.Item
+        label="Min"
+        name="Minstatus"
+      >
+         <Input onChange={props.handleMinstatus}/>
+      </Form.Item>
+
+      <Form.Item
+        label="Description"
+        name="Descstatus"
+      >
+         <Input onChange={props.handleDescstatus}/>
+      </Form.Item>
+
+      <Form.Item
+        label="Ui"
+        name="Uistatus"
+      >
+         <Input onChange={props.handleUistatus}/>
+      </Form.Item>
+
+      <Form.Item
+        label="Presist"
+        name="Presiststatus"
+      >
+         <Input onChange={props.handlePresiststatus}/>
       </Form.Item>
 
       <Form.Item wrapperCol={{ offset: 6, span: 12 }}>

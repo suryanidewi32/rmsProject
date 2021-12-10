@@ -1,12 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Switch } from 'react-router-dom';
 
-import ConfigModule from 'Controllers/Services/Config/module_Getconfig.service';
+import ConfigModule from 'Views/Components/Forms/Configs/Configs';
 import DeviceModule from 'Controllers/Services/Device/module_Postdevice.service';
 import HomeControl from 'Views/Components/Layout/Index';
-import ItemModule from 'Controllers/Services/Item/module_Getitem.service';
-import ProtocolModule from 'Controllers/Services/Protocol/module_Getprotocol.service';
-import StatusModule from 'Controllers/Services/Status/module_Getstatus.service';
+import ItemModule from 'Views/Components/Forms/Items/Items';
+import ProtocolModule from 'Views/Components/Forms/Protocols/Protocols';
+import StatusModule from 'Views/Components/Forms/Statuses/Statuses';
 import TreeModule from 'Controllers/Services/Tree/module_Gettree.service';
 
 const Routing = () => (

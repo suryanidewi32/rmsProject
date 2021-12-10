@@ -19,6 +19,12 @@ const Device = () => {
   const [configprotocolname, setConfigprotocolname] = useState('');
   const [configitem, setConfigitem] = useState('');
   const [configitemname, setConfigitemname] = useState('');
+  const [configpriority, setConfigpriority] = useState('');
+  const [configmax, setConfigmax] = useState('');
+  const [configmin, setConfigmin] = useState('');
+  const [configdesc, setConfigdesc] = useState('');
+  const [configui, setConfigui] = useState('');
+  const [configpersist, setConfigpersist] = useState('');
 
   const [statustype, setStatusType] = useState('');
   const [statusname, setStatusName] = useState('');
@@ -26,6 +32,12 @@ const Device = () => {
   const [statusprotocolname, setStatusprotocolname] = useState('');
   const [statusitem, setStatusitem] = useState('');
   const [statusitemname, setStatusitemname] = useState('');
+  const [statuspriority, setStatuspriority] = useState('');
+  const [statusmax, setStatusmax] = useState('');
+  const [statusmin, setStatusmin] = useState('');
+  const [statusdesc, setStatusdesc] = useState('');
+  const [statusui, setStatusui] = useState('');
+  const [statuspersist, setStatuspersist] = useState('');
 
   const [dataa, setData] = useState(null);
 
@@ -36,13 +48,15 @@ const Device = () => {
       name: name,
       version: version,
       modules: [modules,addmodule], 
-      configs: {id: id, type: configtype, name: configname, protocol:[{id: id, type: configprotocol, name: configprotocolname, items:[{id: id, type: configitem, name: configitemname}]}]},
-      status: {id: id, type: statustype, name: statusname, protocol:[{id: id, type: statusprotocol, name: statusprotocolname, items:[{id: id, type: statusitem, name: statusitemname}]}]},
+      configs: [{id: id, type: configtype, name: configname, protocol:[{id: id, type: configprotocol, name: configprotocolname, items:[{id: id, type: configitem, name: configitemname, priority:configpriority,default:{max:parseInt(configmax),min:parseInt(configmin)},description:configdesc,ui:Boolean(configui),persist:Boolean(configpersist)}]}]}],
+      status: [{id: id, type: statustype, name: statusname, protocol:[{id: id, type: statusprotocol, name: statusprotocolname, items:[{id: id, type: statusitem, name: statusitemname, priority:statuspriority,default:{max:parseInt(statusmax),min:parseInt(statusmin)},description:statusdesc,ui:Boolean(statusui),persist:Boolean(statuspersist)}]}]}],
     };
     axios.post('http://localhost:4001/descriptor/New', data).then((res) => {
       setData(res.data);
+      console.log(res.data)
     });
   };
+ console.log(dataa)
 
   const typeid = (e) => {
     setId(e.target.value);
@@ -93,6 +107,31 @@ const Device = () => {
     setConfigitemname(e.target.value);
   };
 
+  const priorityvalue = (e) => {
+    setConfigpriority(e.target.value);
+  };
+
+  const maxvalue = (e) => {
+    setConfigmax(e.target.value);
+  };
+
+  const minvalue = (e) => {
+    setConfigmin(e.target.value);
+  };
+
+  const descvalue = (e) => {
+    setConfigdesc(e.target.value);
+  };
+
+  const uivalue = (e) => {
+    setConfigui(e.target.value);
+  };
+
+  const persistvalue = (e) => {
+    setConfigpersist(e.target.value);
+  };
+
+
   const statusvalue = (e) => {
     setStatusType(e.target.value);
   };
@@ -117,10 +156,33 @@ const Device = () => {
     setStatusitemname(e.target.value);
   };
 
+  const statuspriorityvalue = (e) => {
+    setStatuspriority(e.target.value);
+  };
+
+  const statusmaxvalue = (e) => {
+    setStatusmax(e.target.value);
+  };
+
+  const statusminvalue = (e) => {
+    setStatusmin(e.target.value);
+  };
+
+  const statusdescvalue = (e) => {
+    setStatusdesc(e.target.value);
+  };
+
+  const statusuivalue = (e) => {
+    setStatusui(e.target.value);
+  };
+
+  const statuspersistvalue = (e) => {
+    setStatuspersist(e.target.value);
+  };
 
   return (
     <div>
-     <DeviceForm id={id} name={name} type={type} handleId={typeid} handleType={typevalue} handleName={namevalue} handleModule={modulevalue} handleaddModule={addmodulevalue} handleVersion={versionvalue} handleConfigType={configvalue} handleConfigName={configsvalue} handleProtocolType={protypevalue} handleProtocolName={protnamevalue} handleStatustype={statusvalue} handleStatusName={statusesvalue} handleProtocolTypestatus={statypevalue} handleProtocolNamestatus={stanamevalue} handleSubmit={handleSubmit} handleItemsTypeconfig={itemstypevalue} handleItemsNameconfig={itemsnamevalue} handleItemsTypestatus={staitemstypevalue} handleItemsNamestatus={staitemsvalue} data={dataa} />
+     <DeviceForm id={id} name={name} type={type} handleId={typeid} handleType={typevalue} handleName={namevalue} handleModule={modulevalue} handleaddModule={addmodulevalue} handleVersion={versionvalue} handleConfigType={configvalue} handleConfigName={configsvalue} handleProtocolType={protypevalue} handleProtocolName={protnamevalue} handleStatustype={statusvalue} handleStatusName={statusesvalue} handleProtocolTypestatus={statypevalue} handleProtocolNamestatus={stanamevalue} handleSubmit={handleSubmit} handleItemsTypeconfig={itemstypevalue} handleItemsNameconfig={itemsnamevalue} handleItemsTypestatus={staitemstypevalue} handleItemsNamestatus={staitemsvalue} handlePrioritystatus={statuspriorityvalue} handleMaxstatus ={statusmaxvalue} handleMinstatus={statusminvalue} handleDescstatus={statusdescvalue} handleUistatus={statusuivalue} handlePresiststatus={statuspersistvalue} handlePriorityconfig={priorityvalue} handleMaxconfig={maxvalue} handleMinconfig={minvalue} handleDescconfig={descvalue} handleUiconfig={uivalue} handlePresistconfig={persistvalue} data={dataa} />
     </div>
   );
 };

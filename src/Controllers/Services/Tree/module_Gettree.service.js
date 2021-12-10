@@ -1,19 +1,39 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import axios from 'axios';
+import http from 'Controllers/Services/http';
+import Searchtree from 'Views/Components/Forms/Trees/TreeSearch';
+import TreeNode from 'Views/Components/Forms/Trees/TreeNode';
 
-import Searchtree from 'Views/Components/Forms/TreeSearch';
-import TreeNode from 'Views/Components/Forms/TreeNode';
 
 const TreeModule = () => {
-  const [treeGet, setTreeGet] = useState([]);
+
   const [search, setSearch] = useState('');
   const [searchShow, setSearchShow] = useState(false);
 
+  const RetriveTree = "RetriveTree";
+    
+  const getAll = () => {
+    return http.get("/descriptors/");
+  };
+  const RetriveItems = () => async (dispatch) => {
+    try {
+      const res = await getAll();
+  
+      dispatch({
+        type: RetriveTree,
+        payload: res.data,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const trees = useSelector(state => state.trees);
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    axios.get('http://localhost:4001/descriptors/').then((res) => {
-      setTreeGet(res.data);
-    });
+    dispatch(RetriveItems());
   }, []);
 
   const handleInput = (e) => {
@@ -25,14 +45,20 @@ const TreeModule = () => {
     }
   };
 
-  const filter = treeGet.filter((data) => data.id.toLowerCase().includes(search.toLowerCase()));
+const filter =()=>{
+  for (var i = 0; i < trees.length; i++) {
+    let array = trees[i]
+    const data= array.data.filter((datas) => datas.id.toLowerCase().includes(search.toLowerCase()));
+    return data.map((datas) => <TreeNode key={i} name={datas.name} type={datas.type} version={datas.version} module={datas.modules} config={datas.configs[i].type} protocol={datas.configs[i].protocol[i].name} item={datas.configs[i].protocol[i].items[i].name} typeitems={datas.configs[i].protocol[i].items[i].type} status={datas.status[i].type} protocolstatus={datas.status[i].protocol[i].name} itemstatus={datas.status[i].protocol[i].items[i].name} typeitemsstatus={datas.status[i].protocol[i].items[i].type}/>);
+}}
 
-  const trees = filter.map((data, i) => <TreeNode key={i} name={data.name} type={data.type} version={data.version} module={data.modules[i]} config={data.configs.type} protocol={data.configs.protocol[i].name} item={data.configs.protocol[i].items[i].name} typeitems={data.configs.protocol[i].items[i].type} status={data.status.type} protocolstatus={data.status.protocol[i].name} itemstatus={data.status.protocol[i].items[i].name} typeitemsstatus={data.status.protocol[i].items[i].type}/>);
+  const dataTree= filter()
 
   return (
     <div>
       <Searchtree handleInput={handleInput} />
-      {trees}
+      {dataTree}
+
       
     </div>
   );
